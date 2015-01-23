@@ -46,6 +46,19 @@ An instance of [LWP::UserAgent](https://metacpan.org/pod/LWP::UserAgent) used to
 You may want to set this to your own instance of a subclass or otherwise
 customized object to add caching, logging, or other features.
 
+## use\_loader
+
+Defaults to true, will use
+[XML::CompileX::Schema::Loader](https://metacpan.org/pod/XML::CompileX::Schema::Loader) to collect all
+imported documents from `uris`. You may want to unset this if you know there
+are no imports or you are handling it some other way.
+
+## wsdl
+
+Use this optional attribute at construction time to specify your own
+[XML::Compile::WSDL11](https://metacpan.org/pod/XML::Compile::WSDL11) object, perhaps after installing
+hooks or other mechanisms for correcting issues with retrieved WSDL or schemas.
+
 # METHODS
 
 ## export

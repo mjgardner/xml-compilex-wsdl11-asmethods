@@ -7,7 +7,7 @@ use utf8;
 use Carp;
 use LWP::UserAgent;
 use Moo;
-use MooX::Types::MooseLike::Base qw(ArrayRef InstanceOf);
+use MooX::Types::MooseLike::Base qw(ArrayRef Bool InstanceOf);
 use Package::Stash;
 use Params::Util '_CLASS';
 use Scalar::Util 'blessed';
@@ -44,7 +44,7 @@ has uris => (
 sub export {
     my $self = shift;
     my $stash = Package::Stash->new( shift // $self->namespace );
-    for my $method ( map { $_->name } $self->_wsdl->operations ) {
+    for my $method ( map { $_->name } $self->wsdl->operations ) {
         $stash->add_symbol( "&$method" => $self->_method_closure($method) );
     }
     return;
@@ -55,7 +55,7 @@ sub _method_closure {
     return sub {
         if ( 1 == @_ % 2 ) {shift}
         try {
-            $self->_wsdl->compileCall( $method,
+            $self->wsdl->compileCall( $method,
                 transport => $self->_transport );
         }
         catch {
@@ -64,7 +64,7 @@ sub _method_closure {
                 and 'a compiled call for {name} already exists' ne
                 $_->message->msgid;
         };
-        my @results = $self->_wsdl->call( $method => @_ );
+        my @results = $self->wsdl->call( $method => @_ );
         if ( not $results[0] ) {
             for ( $results[1]->errors ) { $_->throw }
         }
@@ -72,18 +72,22 @@ sub _method_closure {
     };
 }
 
-has _wsdl => ( is => 'lazy', isa => InstanceOf ['XML::Compile::WSDL11'] );
+has wsdl => ( is => 'lazy', isa => InstanceOf ['XML::Compile::WSDL11'] );
 
-sub _build__wsdl {
-    my $self   = shift;
-    my $wsdl   = XML::Compile::WSDL11->new;
-    my $loader = XML::CompileX::Schema::Loader->new(
-        wsdl => $wsdl,
-        map { ( $_ => $self->$_ ) } qw(uris user_agent),
-    );
-    $loader->collect_imports;
+sub _build_wsdl {
+    my $self = shift;
+    my $wsdl = XML::Compile::WSDL11->new;
+    if ( $self->use_loader ) {
+        my $loader = XML::CompileX::Schema::Loader->new(
+            wsdl => $wsdl,
+            map { ( $_ => $self->$_ ) } qw(uris user_agent),
+        );
+        $loader->collect_imports;
+    }
     return $wsdl;
 }
+
+has use_loader => ( is => 'ro', isa => Bool, default => 1 );
 
 has _transport => (
     is      => 'lazy',
@@ -145,6 +149,19 @@ as methods. Can be overridden when the C<export> method is actually called.
 An instance of L<LWP::UserAgent|LWP::UserAgent> used to load the C<uris>.
 You may want to set this to your own instance of a subclass or otherwise
 customized object to add caching, logging, or other features.
+
+=attr use_loader
+
+Defaults to true, will use
+L<XML::CompileX::Schema::Loader|XML::CompileX::Schema::Loader> to collect all
+imported documents from C<uris>. You may want to unset this if you know there
+are no imports or you are handling it some other way.
+
+=attr wsdl
+
+Use this optional attribute at construction time to specify your own
+L<XML::Compile::WSDL11|XML::Compile::WSDL11> object, perhaps after installing
+hooks or other mechanisms for correcting issues with retrieved WSDL or schemas.
 
 =method export
 
