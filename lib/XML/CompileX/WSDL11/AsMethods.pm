@@ -101,7 +101,8 @@ has _transport => (
 ## no critic (Subroutines::RequireArgUnpacking)
 sub BUILDARGS {
     shift;
-    return { ( 'HASH' ne ref $_[0] and 1 == @_ % 2 ) ? ( uris => @_ ) : @_ };
+    return @_ if 'HASH' eq ref $_[0];
+    return { ( 1 == @_ % 2 ) ? ( uris => @_ ) : @_ };
 }
 
 1;
