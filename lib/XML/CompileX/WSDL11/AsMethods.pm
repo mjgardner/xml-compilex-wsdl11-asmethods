@@ -69,6 +69,7 @@ has _transport => (
 sub _method_closure {
     my ( $self, $method ) = @_;
     return sub {
+        if ( 1 == @_ % 2 ) {shift}
         try {
             $self->_wsdl->compileCall( $method,
                 transport => $self->_transport );
@@ -87,16 +88,16 @@ sub _method_closure {
     };
 }
 
-## no critic (Subroutines::RequireArgUnpacking)
 sub export {
-    my $self = __PACKAGE__ eq ref $_[0] ? shift : __PACKAGE__;
-    my $stash = Package::Stash->new( $self->namespace );
+    my $self = shift;
+    my $stash = Package::Stash->new( shift // $self->namespace );
     for my $method ( map { $_->name } $self->_wsdl->operations ) {
         $stash->add_symbol( "&$method" => $self->_method_closure($method) );
     }
     return;
 }
 
+## no critic (Subroutines::RequireArgUnpacking)
 sub BUILDARGS {
     shift;
     return { ( 1 == @_ % 2 ) ? ( uris => @_ ) : @_ };
@@ -116,5 +117,8 @@ __END__
     use URI::file;
 
     my $methods = XML::CompileX::WSDL11::AsMethods->new(
-        URI::file->new_abs('foo.wsdl') );
-    $methods->export;
+        URI::file->new_abs('stockquote.wsdl') );
+    $methods->export('My::StockQuote');
+
+    my ($answer_ref, $trace) = My::StockQuote->GetLastTradePrice(
+        body => {tickerSymbol => 'AAPL'} );

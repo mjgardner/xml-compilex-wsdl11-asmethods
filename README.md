@@ -12,8 +12,11 @@ version 0.001
     use URI::file;
 
     my $methods = XML::CompileX::WSDL11::AsMethods->new(
-        URI::file->new_abs('foo.wsdl') );
-    $methods->export;
+        URI::file->new_abs('stockquote.wsdl') );
+    $methods->export('My::StockQuote');
+
+    my ($answer_ref, $trace) = My::StockQuote->GetLastTradePrice(
+        body => {tickerSymbol => 'AAPL'} );
 
 # SUPPORT
 

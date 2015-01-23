@@ -37,11 +37,32 @@ my $methods = new_ok(
         user_agent => $user_agent,
     ],
 );
-lives_ok( sub { $methods->export } => 'export' );
-is( ref *GetLastTradePrice{CODE}, 'CODE' => 'GetLastTradePrice coderef' );
-cmp_ok(
-    GetLastTradePrice( body => { tickerSymbol => 'AAPL' } )->{body}{price},
-    '==', 34.5 => 'GetLastTradePrice response' );
+
+subtest 'no namespace' => sub {
+    lives_ok( sub { $methods->export } => 'export' );
+    is( ref *GetLastTradePrice{CODE}, 'CODE' => 'GetLastTradePrice coderef' );
+    cmp_ok(
+        GetLastTradePrice( body => { tickerSymbol => 'AAPL' } )
+            ->{body}{price},
+        '==',
+        34.5 => 'GetLastTradePrice response',
+    );
+};
+
+subtest 'with namespace' => sub {
+    lives_ok(
+        sub { $methods->export('Local::Test::StockQuote') } => 'export' );
+    is( ref *Local::Test::StockQuote::GetLastTradePrice{CODE},
+        'CODE' => 'GetLastTradePrice coderef' );
+    cmp_ok(
+        Local::Test::StockQuote->GetLastTradePrice(
+            body => { tickerSymbol => 'AAPL' }
+            )->{body}{price},
+        '==',
+        34.5 => 'GetLastTradePrice response',
+    );
+};
+
 done_testing;
 
 sub examplecom_responder {
