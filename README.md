@@ -35,6 +35,10 @@ Either a URI string or [URI](https://metacpan.org/pod/URI) object, or a referenc
 These will be loaded as WSDL and XSD files that define the available SOAP
 operations and their input and output parameters.
 
+If you pass an odd number of arguments to the `new` constructor method (and
+you're not just passing in a hash reference), the first argument will be
+used as the value for this attribute.
+
 ## namespace
 
 The namespace of the Perl class into which the SOAP operations will be exported

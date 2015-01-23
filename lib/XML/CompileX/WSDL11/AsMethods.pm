@@ -101,7 +101,7 @@ has _transport => (
 ## no critic (Subroutines::RequireArgUnpacking)
 sub BUILDARGS {
     shift;
-    return { ( 1 == @_ % 2 ) ? ( uris => @_ ) : @_ };
+    return { ( 'HASH' ne ref $_[0] and 1 == @_ % 2 ) ? ( uris => @_ ) : @_ };
 }
 
 1;
@@ -138,6 +138,10 @@ C<export>.
 Either a URI string or L<URI|URI> object, or a reference to an array of them.
 These will be loaded as WSDL and XSD files that define the available SOAP
 operations and their input and output parameters.
+
+If you pass an odd number of arguments to the C<new> constructor method (and
+you're not just passing in a hash reference), the first argument will be
+used as the value for this attribute.
 
 =attr namespace
 
