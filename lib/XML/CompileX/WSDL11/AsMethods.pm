@@ -41,30 +41,14 @@ has uris => (
     },
 );
 
-has _wsdl => (
-    is  => 'lazy',
-    isa => InstanceOf ['XML::Compile::WSDL11'],
-);
-
-sub _build__wsdl {
-    my $self   = shift;
-    my $wsdl   = XML::Compile::WSDL11->new;
-    my $loader = XML::CompileX::Schema::Loader->new(
-        wsdl => $wsdl,
-        map { ( $_ => $self->$_ ) } qw(uris user_agent),
-    );
-    $loader->collect_imports;
-    return $wsdl;
+sub export {
+    my $self = shift;
+    my $stash = Package::Stash->new( shift // $self->namespace );
+    for my $method ( map { $_->name } $self->_wsdl->operations ) {
+        $stash->add_symbol( "&$method" => $self->_method_closure($method) );
+    }
+    return;
 }
-
-has _transport => (
-    is      => 'lazy',
-    isa     => InstanceOf ['XML::Compile::Transport'],
-    default => sub {
-        XML::Compile::Transport::SOAPHTTP->new(
-            user_agent => shift->user_agent );
-    },
-);
 
 sub _method_closure {
     my ( $self, $method ) = @_;
@@ -88,14 +72,27 @@ sub _method_closure {
     };
 }
 
-sub export {
-    my $self = shift;
-    my $stash = Package::Stash->new( shift // $self->namespace );
-    for my $method ( map { $_->name } $self->_wsdl->operations ) {
-        $stash->add_symbol( "&$method" => $self->_method_closure($method) );
-    }
-    return;
+has _wsdl => ( is => 'lazy', isa => InstanceOf ['XML::Compile::WSDL11'] );
+
+sub _build__wsdl {
+    my $self   = shift;
+    my $wsdl   = XML::Compile::WSDL11->new;
+    my $loader = XML::CompileX::Schema::Loader->new(
+        wsdl => $wsdl,
+        map { ( $_ => $self->$_ ) } qw(uris user_agent),
+    );
+    $loader->collect_imports;
+    return $wsdl;
 }
+
+has _transport => (
+    is      => 'lazy',
+    isa     => InstanceOf ['XML::Compile::Transport'],
+    default => sub {
+        XML::Compile::Transport::SOAPHTTP->new(
+            user_agent => shift->user_agent );
+    },
+);
 
 ## no critic (Subroutines::RequireArgUnpacking)
 sub BUILDARGS {
