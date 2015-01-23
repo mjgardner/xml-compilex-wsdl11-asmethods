@@ -21,7 +21,11 @@ use XML::CompileX::WSDL11::AsMethods;
 #use Log::Report mode => 'DEBUG';
 
 const my $SERVICE_WSDL => 't/stockquote/stockquoteservice.wsdl';
+const my %PARAMS       => ( body => { tickerSymbol => 'AAPL' } );
+const my $EXPECTED     => 34.5;
 const my $XPC          => XML::LibXML::XPathContext->new;
+const my $XPATH        => '/SOAPENV:Envelope/SOAPENV:Body/*';
+
 $XPC->registerNs( SOAPENV => SOAP11ENV );
 $XPC->registerNs( xsd1    => 'http://example.com/stockquote/schemas' );
 
@@ -31,22 +35,14 @@ $user_agent->map_response(
     sub { 'POST' eq $_[0]->method and 'localhost' eq $_[0]->uri->host } =>
         \&localhost_responder );
 
-my $methods = new_ok(
-    'XML::CompileX::WSDL11::AsMethods' => [
-        uris       => URI::file->new_abs($SERVICE_WSDL),
-        user_agent => $user_agent,
-    ],
-);
+my $methods = new_ok( 'XML::CompileX::WSDL11::AsMethods' =>
+        [ URI::file->new_abs($SERVICE_WSDL), user_agent => $user_agent ] );
 
 subtest 'no namespace' => sub {
     lives_ok( sub { $methods->export } => 'export' );
     is( ref *GetLastTradePrice{CODE}, 'CODE' => 'GetLastTradePrice coderef' );
-    cmp_ok(
-        GetLastTradePrice( body => { tickerSymbol => 'AAPL' } )
-            ->{body}{price},
-        '==',
-        34.5 => 'GetLastTradePrice response',
-    );
+    cmp_ok( GetLastTradePrice(%PARAMS)->{body}{price},
+        '==', $EXPECTED => 'GetLastTradePrice response' );
 };
 
 subtest 'with namespace' => sub {
@@ -55,12 +51,8 @@ subtest 'with namespace' => sub {
     is( ref *Local::Test::StockQuote::GetLastTradePrice{CODE},
         'CODE' => 'GetLastTradePrice coderef' );
     cmp_ok(
-        Local::Test::StockQuote->GetLastTradePrice(
-            body => { tickerSymbol => 'AAPL' }
-            )->{body}{price},
-        '==',
-        34.5 => 'GetLastTradePrice response',
-    );
+        Local::Test::StockQuote->GetLastTradePrice(%PARAMS)->{body}{price},
+        '==', $EXPECTED => 'GetLastTradePrice response' );
 };
 
 done_testing;
@@ -82,8 +74,9 @@ sub localhost_responder {
         [ 'Content-Type' => 'text/xml' ] => path(
             't/stockquote',
             (   split ':' => $XPC->findnodes(
-                    '/SOAPENV:Envelope/SOAPENV:Body/*',
-                    XML::LibXML->load_xml( string => shift->decoded_content ),
+                    $XPATH => XML::LibXML->load_xml(
+                        string => shift->decoded_content,
+                    ),
                 )->get_node(1)->nodeName,
                 )[1]
                 . '.xml',
