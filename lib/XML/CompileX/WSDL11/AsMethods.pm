@@ -1,6 +1,9 @@
 package XML::CompileX::WSDL11::AsMethods;
 
 use Modern::Perl '2010';    ## no critic (Modules::ProhibitUseQuotedVersion)
+
+# VERSION
+use utf8;
 use Carp;
 use LWP::UserAgent;
 use Moo;
@@ -16,8 +19,8 @@ use XML::CompileX::Schema::Loader;
 
 has namespace => (
     is  => 'lazy',
-    isa => sub { $_[0] !~ /\P{ASCII}/ and _CLASS( $_[0] ) },
-    default => sub { ( caller(2) )[0] },
+    isa => sub { $_[0] !~ / \P{ASCII} /xms and _CLASS( $_[0] ) },
+    default => sub { (caller 2)[0] },
 );
 
 has user_agent => (
@@ -47,7 +50,7 @@ sub _build__wsdl {
     my $wsdl   = XML::Compile::WSDL11->new;
     my $loader = XML::CompileX::Schema::Loader->new(
         wsdl => $wsdl,
-        map { ( $_ => $self->$_ ) } qw(uris user_agent)
+        map { ( $_ => $self->$_ ) } qw(uris user_agent),
     );
     $loader->collect_imports;
     return $wsdl;
@@ -62,23 +65,12 @@ has _transport => (
     },
 );
 
-sub export {
-    my $self = __PACKAGE__ eq ref $_[0] ? shift : __PACKAGE__;
-    for my $method ( map { $_->name } $self->_wsdl->operations ) {
-        ## no critic (ProhibitNoStrict,ProhibitNoWarnings)
-        no strict 'refs';
-        no warnings 'redefine';
-        *{ $self->namespace . "::$method" } = $self->_method_closure($method);
-    }
-    return;
-}
-
 sub _method_closure {
     my ( $self, $method ) = @_;
     return sub {
         try {
             $self->_wsdl->compileCall( $method,
-                transport => $self->_transport )
+                transport => $self->_transport );
         }
         catch {
             croak $_
@@ -94,6 +86,18 @@ sub _method_closure {
     };
 }
 
+## no critic (Subroutines::RequireArgUnpacking)
+sub export {
+    my $self = __PACKAGE__ eq ref $_[0] ? shift : __PACKAGE__;
+    for my $method ( map { $_->name } $self->_wsdl->operations ) {
+        ## no critic (ProhibitNoStrict,ProhibitNoWarnings)
+        no strict 'refs';
+        no warnings 'redefine';
+        *{ $self->namespace . "::$method" } = $self->_method_closure($method);
+    }
+    return;
+}
+
 1;
 
 # ABSTRACT: Export SOAP operations as Perl methods
@@ -103,5 +107,5 @@ __END__
 =head1 SYNOPSIS
 
     use XML::CompileX::WSDL11::AsMethods;
-    
+
     XML::CompileX::WSDL11::AsMethods->export('foo.wsdl');

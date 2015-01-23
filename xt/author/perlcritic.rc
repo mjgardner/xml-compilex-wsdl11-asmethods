@@ -1,6 +1,6 @@
 severity = brutal
 verbose = 8
-exclude = CodeLayout::ProhibitHashBarewords Perl::Critic::Policy::Documentation::RequirePODUseEncodingUTF8 Editor::RequireEmacsFileVariables Modules::RequirePerlVersion Tics::ProhibitLongLines
+exclude = CodeLayout::ProhibitHashBarewords Documentation::RequirePODUseEncodingUTF8 Editor::RequireEmacsFileVariables ErrorHandling::RequireUseOfExceptions Modules::RequirePerlVersion Tics::ProhibitLongLines
 
 [CodeLayout::RequireTidyCode]
 perltidyrc = xt/author/perltidy.rc
@@ -14,6 +14,9 @@ above_version = 5.010
 [Documentation::RequirePodSections]
 lib_sections = NAME | VERSION | SYNOPSIS | DESCRIPTION | SUPPORT | AUTHOR | COPYRIGHT AND LICENSE
 script_sections = NAME | USAGE | DESCRIPTION | CONFIGURATION | SUPPORT | AUTHOR | COPYRIGHT AND LICENSE
+
+[Subroutines::ProhibitCallsToUndeclaredSubs]
+exempt_subs = Carp::croak Moo::has Try::Tiny::catch Try::Tiny::try
 
 [Subroutines::ProhibitUnusedPrivateSubroutines]
 private_name_regex = _(?!build_)\w+

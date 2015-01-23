@@ -9,7 +9,7 @@ version 0.001
 # SYNOPSIS
 
     use XML::CompileX::WSDL11::AsMethods;
-    
+
     XML::CompileX::WSDL11::AsMethods->export('foo.wsdl');
 
 # SUPPORT
@@ -83,7 +83,7 @@ in addition to those websites please use your favorite search engine to discover
 
 Please report any bugs or feature requests through the web
 interface at
-[https://starterview.unfuddle.com/a#/projects/1/ticket\_reports/61](https://starterview.unfuddle.com/a#/projects/1/ticket_reports/61).
+[https://github.com/mjgardner/xml-compilex-wsdl11-asmethods/issues](https://github.com/mjgardner/xml-compilex-wsdl11-asmethods/issues).
 You will be automatically notified of any progress on the
 request by the system.
 
@@ -93,9 +93,9 @@ The code is open to the world, and available for you to hack on. Please feel fre
 with it, or whatever. If you want to contribute patches, please send me a diff or prod me to pull
 from your repository :)
 
-[https://git.ziprecruiter.com/ZipRecruiter/local-webservice-netsuite-suitetalk](https://git.ziprecruiter.com/ZipRecruiter/local-webservice-netsuite-suitetalk)
+[https://github.com/mjgardner/xml-compilex-wsdl11-asmethods](https://github.com/mjgardner/xml-compilex-wsdl11-asmethods)
 
-    https://git.ziprecruiter.com/ZipRecruiter/local-webservice-netsuite-suitetalk.git
+    git clone git://github.com/mjgardner/xml-compilex-wsdl11-asmethods.git
 
 # AUTHOR
 
