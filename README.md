@@ -18,6 +18,44 @@ version 0.001
     my ($answer_ref, $trace) = My::StockQuote->GetLastTradePrice(
         body => {tickerSymbol => 'AAPL'} );
 
+# DESCRIPTION
+
+This module provides a mechanism for exporting the SOAP operations defined in
+one or more WSDL/schema documents as regular Perl class methods that will then
+call the appropriate web service. By default it exports these methods into
+the current namespace when the `export` method is called; however you can
+explicitly specify a different one either during construction or when calling
+`export`.
+
+# ATTRIBUTES
+
+## uris
+
+Either a URI string or [URI](https://metacpan.org/pod/URI) object, or a reference to an array of them.
+These will be loaded as WSDL and XSD files that define the available SOAP
+operations and their input and output parameters.
+
+## namespace
+
+The namespace of the Perl class into which the SOAP operations will be exported
+as methods. Can be overridden when the `export` method is actually called.
+
+## user\_agent
+
+An instance of [LWP::UserAgent](https://metacpan.org/pod/LWP::UserAgent) used to load the `uris`.
+You may want to set this to your own instance of a subclass or otherwise
+customized object to add caching, logging, or other features.
+
+# METHODS
+
+## export
+
+When called, this method exports the operations defined by `uris` into either
+the current namespace or one passed in as a string. These methods typically
+take a hash of name-value pairs as arguments, and will return their results
+as a hash reference and an
+[XML::Compile::SOAP::Trace](https://metacpan.org/pod/XML::Compile::SOAP::Trace) object.
+
 # SUPPORT
 
 ## Perldoc

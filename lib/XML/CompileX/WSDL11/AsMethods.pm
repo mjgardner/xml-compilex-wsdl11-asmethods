@@ -119,3 +119,37 @@ __END__
 
     my ($answer_ref, $trace) = My::StockQuote->GetLastTradePrice(
         body => {tickerSymbol => 'AAPL'} );
+
+=head1 DESCRIPTION
+
+This module provides a mechanism for exporting the SOAP operations defined in
+one or more WSDL/schema documents as regular Perl class methods that will then
+call the appropriate web service. By default it exports these methods into
+the current namespace when the C<export> method is called; however you can
+explicitly specify a different one either during construction or when calling
+C<export>.
+
+=attr uris
+
+Either a URI string or L<URI|URI> object, or a reference to an array of them.
+These will be loaded as WSDL and XSD files that define the available SOAP
+operations and their input and output parameters.
+
+=attr namespace
+
+The namespace of the Perl class into which the SOAP operations will be exported
+as methods. Can be overridden when the C<export> method is actually called.
+
+=attr user_agent
+
+An instance of L<LWP::UserAgent|LWP::UserAgent> used to load the C<uris>.
+You may want to set this to your own instance of a subclass or otherwise
+customized object to add caching, logging, or other features.
+
+=method export
+
+When called, this method exports the operations defined by C<uris> into either
+the current namespace or one passed in as a string. These methods typically
+take a hash of name-value pairs as arguments, and will return their results
+as a hash reference and an
+L<XML::Compile::SOAP::Trace|XML::Compile::SOAP::Trace> object.
