@@ -42,9 +42,10 @@ as methods. Can be overridden when the `export` method is actually called.
 
 ## user\_agent
 
-An instance of [LWP::UserAgent](https://metacpan.org/pod/LWP::UserAgent) used to load the `uris`.
-You may want to set this to your own instance of a subclass or otherwise
-customized object to add caching, logging, or other features.
+An instance of [LWP::UserAgent](https://metacpan.org/pod/LWP::UserAgent) used to load the `uris` as
+well as make SOAP calls. You may want to set this to your own instance of a
+subclass or otherwise customized object to add caching, logging or
+other features.
 
 ## use\_loader
 

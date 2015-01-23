@@ -146,9 +146,10 @@ as methods. Can be overridden when the C<export> method is actually called.
 
 =attr user_agent
 
-An instance of L<LWP::UserAgent|LWP::UserAgent> used to load the C<uris>.
-You may want to set this to your own instance of a subclass or otherwise
-customized object to add caching, logging, or other features.
+An instance of L<LWP::UserAgent|LWP::UserAgent> used to load the C<uris> as
+well as make SOAP calls. You may want to set this to your own instance of a
+subclass or otherwise customized object to add caching, logging or
+other features.
 
 =attr use_loader
 
