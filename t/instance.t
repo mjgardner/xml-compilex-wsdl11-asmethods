@@ -21,7 +21,7 @@ use XML::CompileX::WSDL11::AsMethods;
 #use Log::Report mode => 'DEBUG';
 
 const my $SERVICE_WSDL => 't/stockquote/stockquoteservice.wsdl';
-const my $XPC => XML::LibXML::XPathContext->new;
+const my $XPC          => XML::LibXML::XPathContext->new;
 $XPC->registerNs( SOAPENV => SOAP11ENV );
 $XPC->registerNs( xsd1    => 'http://example.com/stockquote/schemas' );
 

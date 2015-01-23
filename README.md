@@ -9,8 +9,11 @@ version 0.001
 # SYNOPSIS
 
     use XML::CompileX::WSDL11::AsMethods;
+    use URI::file;
 
-    XML::CompileX::WSDL11::AsMethods->export('foo.wsdl');
+    my $methods = XML::CompileX::WSDL11::AsMethods->new(
+        URI::file->new_abs('foo.wsdl') );
+    $methods->export;
 
 # SUPPORT
 

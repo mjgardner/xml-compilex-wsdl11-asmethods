@@ -8,6 +8,7 @@ use Carp;
 use LWP::UserAgent;
 use Moo;
 use MooX::Types::MooseLike::Base qw(ArrayRef InstanceOf);
+use Package::Stash;
 use Params::Util '_CLASS';
 use Scalar::Util 'blessed';
 use Try::Tiny;
@@ -20,7 +21,7 @@ use XML::CompileX::Schema::Loader;
 has namespace => (
     is  => 'lazy',
     isa => sub { $_[0] !~ / \P{ASCII} /xms and _CLASS( $_[0] ) },
-    default => sub { (caller 2)[0] },
+    default => sub { ( caller 2 )[0] },
 );
 
 has user_agent => (
@@ -89,13 +90,16 @@ sub _method_closure {
 ## no critic (Subroutines::RequireArgUnpacking)
 sub export {
     my $self = __PACKAGE__ eq ref $_[0] ? shift : __PACKAGE__;
+    my $stash = Package::Stash->new( $self->namespace );
     for my $method ( map { $_->name } $self->_wsdl->operations ) {
-        ## no critic (ProhibitNoStrict,ProhibitNoWarnings)
-        no strict 'refs';
-        no warnings 'redefine';
-        *{ $self->namespace . "::$method" } = $self->_method_closure($method);
+        $stash->add_symbol( "&$method" => $self->_method_closure($method) );
     }
     return;
+}
+
+sub BUILDARGS {
+    shift;
+    return { ( 1 == @_ % 2 ) ? ( uris => @_ ) : @_ };
 }
 
 1;
@@ -104,8 +108,13 @@ sub export {
 
 __END__
 
+=for Pod::Coverage BUILDARGS
+
 =head1 SYNOPSIS
 
     use XML::CompileX::WSDL11::AsMethods;
+    use URI::file;
 
-    XML::CompileX::WSDL11::AsMethods->export('foo.wsdl');
+    my $methods = XML::CompileX::WSDL11::AsMethods->new(
+        URI::file->new_abs('foo.wsdl') );
+    $methods->export;
